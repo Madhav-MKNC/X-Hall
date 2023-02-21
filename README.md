@@ -19,7 +19,6 @@ or
 ```
 python3 server.py
 ```
-  (if on Linux)
  
 - Remember the Host IP and Port no. and update them in the Client program
 - Now users can run the Client program and join the Server
