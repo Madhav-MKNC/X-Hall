@@ -6,11 +6,12 @@ import _thread
 import sys
 
 class Server:
-	def __init__(self, ip, port, name):
+	def __init__(self, ip, port, name, max_connections=5):
 		self.HOST = ip 
 		self.PORT = port 
 		self.HOSTNAME = name 
 		self.client_name = dict()
+		self.MAX_CONNECTIONS = max_connections
 
 		try:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,13 +49,14 @@ class Server:
 			self.sock.shutdown(2)
 			print("[shutdown!]")
 		except ConnectionResetError:
+			client.close()
 			print(f"[<{self.client_name[client]}> left!]")
 		
 	def start(self):
 		try:
 			self.sock.bind((self.HOST, self.PORT))
 			# maximum connections 5
-			self.sock.listen(5)
+			self.sock.listen(self.MAX_CONNECTIONS)
 			print(f"[+] Waiting for Connections at {self.HOST}:{self.PORT}")
 			
 			while True:
