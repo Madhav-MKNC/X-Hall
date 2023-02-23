@@ -3,8 +3,8 @@
 >> **Tasks**
 - error handling 
 - broadcasting all at once
-- broadcasting between each other not only server-client
-- handling IO, better interface
+- broadcasting between all peers not only server-client
+- handling I/O, better interface
 
 
 
