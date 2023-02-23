@@ -1,9 +1,11 @@
 [UNDER DEVELOPMENT CURRENTLY!!]
 
-* tasks 
+**Tasks**
 - broadcasting all at once
 - broadcasting between each other not only server-client
 - handling IO, better interface
+
+
 
 # X-Hall
 X-Hall is a CLI-based Chatroom program hosted on Internal IIT Delhi Network
