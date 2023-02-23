@@ -1,6 +1,6 @@
-[UNDER DEVELOPMENT CURRENTLY!!]
+**[UNDER DEVELOPMENT CURRENTLY!!]**
 
-**Tasks**
+>> **Tasks**
 - broadcasting all at once
 - broadcasting between each other not only server-client
 - handling IO, better interface
