@@ -1,6 +1,7 @@
 **[UNDER DEVELOPMENT CURRENTLY!!]**
 
 >> **Tasks**
+- error handling 
 - broadcasting all at once
 - broadcasting between each other not only server-client
 - handling IO, better interface
