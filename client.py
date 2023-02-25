@@ -26,6 +26,9 @@ class Client:
                 data = input(f"<{self.NAME} *>: ")
                 data = f"<{self.NAME}>: "+data
                 self.sock.send(data.encode('utf-8'))
+            except ConnectionErro:
+                self.sock.close()
+                print(f"[{self.name} disconnected!]")
             except KeyboardInterrupt:
                 break 
     
@@ -36,8 +39,9 @@ class Client:
                 if not data: continue
                 # prettify data
                 print(data)
-            except ConnectionResetError:
-                print(f"[<{self.HOSTNAME}> Shutdown!]")
+            except ConnectionError:
+                self.sock.close()
+                print(f"[<{self.name}> disconnected!]")
                 break
 
     def chat(self):
