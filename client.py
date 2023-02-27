@@ -26,10 +26,9 @@ class Client:
                 data = input(f"<{self.NAME} *>: ")
                 data = f"<{self.NAME}>: "+data
                 self.sock.send(data.encode('utf-8'))
-            except ConnectionErro:
-                self.sock.close()
-                print(f"[{self.name} disconnected!]")
             except KeyboardInterrupt:
+                print("[ ---------- You Exited ---------- ]")
+                self.sock.close()
                 break 
     
     def recv_message(self):
@@ -39,9 +38,9 @@ class Client:
                 if not data: continue
                 # prettify data
                 print(data)
-            except ConnectionError:
+            except ConnectionResetError:
+                print("[ ---------- Connection to server lost ---------- ]")
                 self.sock.close()
-                print(f"[<{self.name}> disconnected!]")
                 break
 
     def chat(self):
@@ -52,10 +51,13 @@ class Client:
             threading.Event().wait() # wait forever
         except KeyboardInterrupt:
             print("[ ---------- You Exited ---------- ]")
-            self.sock.shutdown(2)
+            self.sock.close()
         except ConnectionResetError:
             print("[ ---------- Connection to server lost ---------- ]")
-            self.sock.shutdown(2)
+            self.sock.close()
+        except Exception as e:
+            print("[error]",str(e))
+            self.sock.close()
     
     def connect(self):
         try:
