@@ -1,6 +1,6 @@
 **[UNDER DEVELOPMENT CURRENTLY!!]**
 
->> **Tasks**
+>> **Tasks** >>
 - better error handling 
 - broadcasting all at once
 - broadcasting between all peers not only server-client
