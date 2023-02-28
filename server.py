@@ -1,6 +1,10 @@
 #!/usr/bin/env python3 
 # coding: utf-8
 
+# title: X-HALL server
+# author: Madhav Kumar (https://github.com/Madhav-MKNC)
+# created: 20th Feb 2023
+
 import socket
 import threading
 import sys
