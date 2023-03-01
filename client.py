@@ -8,90 +8,91 @@
 import socket
 import threading
 import sys
-import logging
-import setup
 
-logging.basicConfig(level=logging.ERROR)
+from setup import Host
+from constants import *
 
+# client class
 class Client:
     def __init__(self, name):
-        self.HOST = setup.Server.ip
-        self.PORT = setup.Server.port
-        self.HOSTNAME = setup.Server.hostname
         self.NAME = name
-        
+
+        # host info
+        self.HOSTIP = Host.ip
+        self.PORT = Host.port
+
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error as e:
-            logging.error("Failed to create a socket")
-            logging.error(str(e))
+            print("[!] Failed to create a socket")
+            print("[error]",str(e))
+            sys.exit()
+    
+    def send_data(self, data):
+        try:
+            self.sock.send(data.encode(ENCODING))
+        except ConnectionError:
+            self.sock.close()
+            print("[Connection to server lost!]")
+            sys.exit()   
+
+    def recv_data(self):
+        try:
+            data = self.sock.recv(BUFFERSIZE).decode(ENCODING)
+            return data
+        except ConnectionError:
+            self.sock.close()
+            print("[Connection to server lost!]")
             sys.exit()
 
-    def send_message(self):
-        while True:
-            try:
-                data = input(f"<{self.NAME} *>: ")
-                if not data.strip():
-                    continue
-                if message.lower().strip() in ["$exit", "$quit"]:
-                    self.sock.close()
-                    print("[You Exited!]")
-                data = f"<{self.NAME}>: {data}"
-                self.sock.send(data.encode('utf-8'))
-            except KeyboardInterrupt:
-                logging.error("You Exited")
-                self.sock.close()
-                break
-            except socket.error as e:
-                logging.error("Failed to send message")
-                logging.error(str(e))
-                break
-    
-    def recv_message(self):
-        while True:
-            try:
-                data = self.sock.recv(1024).decode('utf-8')
-                if not data: continue
-                # prettify data
-                print(data)
-            except ConnectionResetError:
-                logging.error("Connection to server lost")
-                self.sock.close()
-                break
-            except socket.error as e:
-                logging.error("Failed to receive message")
-                logging.error(str(e))
-                break
-
-    def chat(self):
-        try:
-            print(self.sock.recv(1024).decode('utf-8'))
-            threading.Thread(target=self.send_message, daemon=True).start()
-            threading.Thread(target=self.recv_message, daemon=True).start()
-            threading.Event().wait() # wait forever
-        except KeyboardInterrupt:
-            logging.error("You Exited")
-            self.sock.close()
-        except ConnectionResetError:
-            logging.error("Connection to server lost")
-            self.sock.close()
-        except socket.error as e:
-            logging.error("Failed to start chat")
-            logging.error(str(e))
-            self.sock.close()
+    def enter_chatroom(self):
+        # This method first sends the user info of the client to the server and then receives a banner or a welcome 
+        self.send_data(self.NAME)
+        banner = self.recv_data()
+        print(banner)
     
     def connect(self):
         try:
-            print("[*] Connecting...")
-            self.sock.connect((self.HOST,self.PORT))
-            self.sock.send(str(self.NAME).encode('utf-8'))
-            print(f"[+] Connected to {self.HOSTNAME} at {self.HOST}:{self.PORT}")
+            print("[*] Connecting to {self.HOSTIP}:{self.PORT}")
+            self.sock.connect((self.HOSTIP,self.PORT))
+            print(f"[+] Connected")
+            self.enter_chatroom()
             self.chat()
-        except socket.error as e:
-            logging.error("Failed to connect to server")
-            logging.error(str(e))
+        except Exception as e:
+            print("[-] Failed to connect to server")
+            print(str(e))
             sys.exit()
+    
+    def send_messages(self):
+        try:
+            while True:
+                data = input(f"<{self.NAME} *>: ").strip()
+                if len(data)==0:
+                    continue
+                if data.lower() in ["$exit", "$quit"]:
+                    print("[You Exited!]")
+                    break
+                data = f"<{self.NAME}>: {data}"
+                self.send_data(data)
+        except KeyboardInterrupt:
+            print("[You Exited!]")
+            self.sock.close()
+
+    def recv_messages(self):
+        while True:
+            data = self.recv_data()
+            if not data: continue
+            print(data)
+
+    def chat(self):
+        try:
+            threading.Thread(target=self.send_messages, daemon=True).start()
+            threading.Thread(target=self.recv_messages, daemon=True).start()
+            threading.Event().wait() # wait forever
+        except Exception as e:
+            print("[ERROR]",str(e))
+        self.sock.close()
 
 if __name__ == "__main__":
-    name = input("[+] Enter your name: ")
+    name = input("[ ] Enter your name: ")
     Client(name).connect()
