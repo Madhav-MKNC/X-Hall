@@ -10,9 +10,18 @@ import threading
 import sys
 
 # for unique usernames
-from time import time as now
+unique_username = 1
+def get_username():
+    global unique_username
+    unique_username += 1
+    return "user{unique_username}"
 
-# INHERITENCE STUFF TO BE DONE
+# constants
+BUFFERSIZE = 1024
+ENCODING = 'utf-8'
+MAX_CONNECTIONS = 5
+
+# INNER Class STUFF TO BE DONE
 class Client:
     def __init__(self, client_sock, hostname):
         self.sock = client_sock
@@ -33,7 +42,7 @@ class Client:
         if len(response)>0 and self.exists(response)==False:
             self.name = response
         else:
-            self.name = f"user{now}"
+            self.name = get_username()
             self.send_message(f"[{self.HOSTNAME}] Username Invalid! You are {self.name}")
 
     def send_message(self, message):
@@ -118,15 +127,7 @@ class Server:
 
 
 
-if __name__ == '__main__':
-
-    # constants
-    BUFFERSIZE = 1024
-    ENCODING = 'utf-8'
-    MAX_CONNECTIONS = 5
-    HOSTNAME = "X-HALL"
-    
-    
+if __name__ == '__main__':    
     host = input("Enter host IP: ")
 	# port = int(input("Enter Port: "))
 	# host = "10.7.10.71"
