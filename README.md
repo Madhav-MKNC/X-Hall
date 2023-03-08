@@ -1,13 +1,5 @@
 **[UNDER DEVELOPMENT CURRENTLY!!]**
 
->> **Tasks** 
-- better error handling 
-- broadcasting all at once
-- broadcasting between all peers not only server-client
-- handling I/O, better interface
-
-
-
 # X-Hall
 X-Hall is a CLI-based Chatroom program hosted on Internal IIT Delhi Network
 
