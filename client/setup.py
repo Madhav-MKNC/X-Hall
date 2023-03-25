@@ -9,6 +9,17 @@ import os
 import sys
 from os import system as cmd
 
+def install_dependencies():
+    try:
+        if os.path.exists('requirements.txt'):
+            print("[+] Wait for a moment, installing dependencies (requirements.txt)")
+            cmd("pip install -r requirements.txt")
+        else:
+            print("[-] requirements.txt not found, install all the dependencies [https://github.com/madhav-mknc/x-hall]")
+            sys.exit()
+    except Exception as e:
+        print("[!]",str(e))
+
 def filterinfo(ip,port):
     try:
         port = int(port)
@@ -52,9 +63,4 @@ if __name__ == "__main__":
     file.close()
     print("[+] Host info saved")
 
-    try:
-        if os.path.exists('requirements.txt'):
-            print("[+] Wait for a moment, installing dependencies (requirements.txt)")
-            cmd("pip install -r requirements.txt")
-    except Exception as e:
-        print("[!]",str(e))
+    install_dependencies()
