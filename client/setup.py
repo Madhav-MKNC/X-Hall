@@ -45,7 +45,7 @@ class Host:
         try:
             with open('.hostinfo','r') as file:
                 info = file.read().split(":")
-            self.ip, self.port = filterinfo(map(str, info))
+            self.ip, self.port = filterinfo(*info)
         except Exception as e:
             print("[error]",str(e))
             self.ip, self.port = filterinfo(0,0)

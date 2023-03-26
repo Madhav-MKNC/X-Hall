@@ -1,0 +1,4 @@
+# constants
+BUFFERSIZE = 1024
+ENCODING = 'utf-8'
+MAX_CONNECTIONS = 5

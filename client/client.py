@@ -18,8 +18,8 @@ class Client:
         self.NAME = name
 
         # host info
-        self.HOSTIP = Host.ip
-        self.PORT = Host.port
+        self.HOSTIP = Host().ip
+        self.PORT = Host().port
 
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -53,7 +53,7 @@ class Client:
     
     def connect(self):
         try:
-            print("[*] Connecting to {self.HOSTIP}:{self.PORT}")
+            print(f"[*] Connecting to {self.HOSTIP}:{self.PORT}")
             self.sock.connect((self.HOSTIP,self.PORT))
             print(f"[+] Connected")
             self.enter_chatroom()

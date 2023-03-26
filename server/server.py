@@ -9,17 +9,8 @@ import socket
 import threading
 import sys
 
-# for unique usernames
-unique_username = 1
-def get_username():
-    global unique_username
-    unique_username += 1
-    return "user{unique_username}"
-
-# constants
-BUFFERSIZE = 1024
-ENCODING = 'utf-8'
-MAX_CONNECTIONS = 5
+from constants import BUFFERSIZE, ENCODING, MAX_CONNECTIONS
+from utils import get_username
 
 # INNER Class STUFF TO BE DONE
 class Client:
@@ -127,10 +118,15 @@ class Server:
 
 
 
-if __name__ == '__main__':    
-    host = input("Enter host IP: ")
-	# port = int(input("Enter Port: "))
-	# host = "10.7.10.71"
-    port = 1234
+if __name__ == '__main__':   
+    try: 
+        host = input("Enter host IP: ")
+        # port = int(input("Enter Port: "))
+        # host = "10.7.10.71"
+        port = int(input("Enter port: "))
+    except:
+        # defaults
+        host = "localhost"
+        port = 1234
     Server(host, port, 'X-Hall').start()
 	
