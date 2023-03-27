@@ -33,7 +33,6 @@ def filterinfo(ip,port):
             return ip, port
     except:
         pass
-    
     print(ip,port)
     print("[!] using default [localhost:1234]")
     return 'localhost',1234

@@ -8,7 +8,6 @@
 import socket
 import threading
 import sys
-
 from setup import Host
 from constants import *
 

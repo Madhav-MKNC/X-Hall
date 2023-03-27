@@ -8,9 +8,8 @@
 import socket
 import threading
 import sys
-
 from constants import BUFFERSIZE, ENCODING, MAX_CONNECTIONS
-from utils import get_username
+from utils import get_username, filterinfo
 
 # INNER Class STUFF TO BE DONE
 class Client:
@@ -20,37 +19,53 @@ class Client:
         self.HOSTNAME = hostname
     
     def exists(self, name):
-        # check the username if already active on the server
+        # check the username if already active on the server (INNER CLASS implementation will fix this)
         return False
 
-    def send_banner(self):
-        banner = f"[ ---------- WELCOME TO THE '{self.HOSTNAME}' CHATROOM ---------- ]"
-        self.send_message(banner)
-
     def set_username(self):
-        self.send_message(f"[username? @{self.HOSTNAME}] ")
-        response = self.recv_message().strip()
+        self.send(f"username? @{self.HOSTNAME}: ")
+        response = self.recv().strip().replace(' ','_')
         if len(response)>0 and self.exists(response)==False:
             self.name = response
         else:
             self.name = get_username()
-            self.send_message(f"[{self.HOSTNAME}] Username Invalid! You are {self.name}")
+            self.send(f"[{self.HOSTNAME}] Username Invalid! You are {self.name}")
+    
+    def send_banner(self):
+        banner = f"[ ---------- WELCOME TO THE '{self.HOSTNAME}' CHATROOM ---------- ]"
+        self.send(banner)
 
-    def send_message(self, message):
+    def send(self, message):
         try:
-            message = f"<{self.name}>@{self.HOSTNAME}: "+message
             self.sock.send(message.encode(ENCODING))
         except ConnectionError:
             print(f"[<{self.name}> DISCONNECTED!]")
             self.sock.close()
 
-    def recv_message(self):
+    def recv(self):
         try:
             data = self.sock.recv(BUFFERSIZE).decode(ENCODING)
             return data
         except ConnectionError:
             print(f"[<{self.name}> DISCONNECTED!]")
             self.sock.close()
+    
+    def send_messages(self):
+        while True:
+            try:
+                message = input(f"<{self.HOSTNAME} *> ")
+                message = f"<{self.HOSTNAME} *> "+message
+                self.send(message)
+            except:
+                break
+
+    def recv_messages(self):
+        while True:
+            try:
+                data = self.recv()
+                if data: print(data)
+            except:
+                break
 
 
 class Server:
@@ -60,19 +75,12 @@ class Server:
         self.HOSTNAME = hostname 
         self.clients = []
 
-        try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        except socket.error as e:
-            print("[!] Failed to create a socket")
-            print("[error]",str(e))
-            sys.exit()
-
     def chat(self, client):
         try:
             client.send_banner()
             client.get_name()
-            self.broadcast(f"[+] <{client.name}> joined the chat room.")
             self.clients.append(client)
+            self.broadcast(f"[+] <{client.name}> joined the chat room.")
             threading.Thread(target=client.send_messages, daemon=True).start()
             threading.Thread(target=client.recv_messages, daemon=True).start()
             threading.Event().wait()
@@ -80,7 +88,7 @@ class Server:
             self.sock.shutdown(2)
             print("[shutdown!]")
             sys.exit()
-        except ConnectionResetError:
+        except ConnectionError:
             self.clients.remove(client)
             self.broadcast(f"[<{client.name}> left!]")
             client.sock.close()
@@ -93,12 +101,14 @@ class Server:
     def broadcast(self, message):
         for client in self.clients:
             try:
-                client.send_message(message)
+                client.send(message)
             except:
                 self.clients.remove(client)
+                self.broadcast(f"[<{client.name}> left!]")
 
     def start(self):
         try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.bind((self.HOSTIP, self.PORT))
             # maximum connections 5
             self.sock.listen(MAX_CONNECTIONS)
@@ -119,14 +129,11 @@ class Server:
 
 
 if __name__ == '__main__':   
-    try: 
-        host = input("Enter host IP: ")
-        # port = int(input("Enter Port: "))
-        # host = "10.7.10.71"
-        port = int(input("Enter port: "))
-    except:
-        # defaults
-        host = "localhost"
-        port = 1234
+    host = input("Enter host IP: ")
+    # port = int(input("Enter Port: "))
+    # host = "10.7.10.71"
+    port = input("Enter port: ")
+    host, port = filterinfo(host, port)
+
     Server(host, port, 'X-Hall').start()
 	
