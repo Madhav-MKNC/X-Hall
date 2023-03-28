@@ -23,8 +23,7 @@ class Client:
         return False
 
     def set_username(self):
-        self.send(f"username? @{self.HOSTNAME}: ")
-        response = self.recv().strip().replace(' ','_')
+        response = self.recv()
         if len(response)>0 and self.exists(response)==False:
             self.name = response
         else:
@@ -53,10 +52,16 @@ class Client:
     def send_messages(self):
         while True:
             try:
-                message = input(f"<{self.HOSTNAME} *> ")
+                message = input(f"<{self.HOSTNAME} *> ").strip()
+                if len(message)==0: continue
+                if message=="shutdown":
+                    # self.shutdown()
+                    print("[shutdown!]")
+                    sys.exit()
                 message = f"<{self.HOSTNAME} *> "+message
                 self.send(message)
-            except:
+            except Exception as e:
+                print("[error]",str(e))
                 break
 
     def recv_messages(self):
@@ -64,8 +69,11 @@ class Client:
             try:
                 data = self.recv()
                 if data: print(data)
-            except:
+            except Exception as e:
+                print("[error]",str(e))
                 break
+    
+
 
 
 class Server:
@@ -78,7 +86,7 @@ class Server:
     def chat(self, client):
         try:
             client.send_banner()
-            client.get_name()
+            client.set_username()
             self.clients.append(client)
             self.broadcast(f"[+] <{client.name}> joined the chat room.")
             threading.Thread(target=client.send_messages, daemon=True).start()
@@ -94,8 +102,7 @@ class Server:
             client.sock.close()
         except Exception as e:
             print("[error]",str(e))
-            self.sock.shutdown(2)
-            print("[shutdown!]")
+            self.sock.close()
             sys.exit()
 
     def broadcast(self, message):

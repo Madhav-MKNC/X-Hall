@@ -19,38 +19,37 @@ class Client:
         # host info
         self.HOSTIP = Host().ip
         self.PORT = Host().port
+    
+    def send(self, data):
+        try:
+            self.sock.send(data.encode(ENCODING))
+        except ConnectionError:
+            self.sock.close()
+            print("[Connection lost!]")
+            sys.exit()   
 
+    def recv(self):
+        try:
+            data = self.sock.recv(BUFFERSIZE).decode(ENCODING)
+            return data
+        except ConnectionError:
+            self.sock.close()
+            print("[Connection lost!]")
+            sys.exit()
+
+    def enter_chatroom(self):
+        # This method first sends the user info of the client to the server and then receives a banner or a welcome 
+        self.send(self.NAME)
+        banner = self.recv()
+        print(banner)
+    
+    def connect(self):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error as e:
             print("[!] Failed to create a socket")
             print("[error]",str(e))
             sys.exit()
-    
-    def send_data(self, data):
-        try:
-            self.sock.send(data.encode(ENCODING))
-        except ConnectionError:
-            self.sock.close()
-            print("[Connection to server lost!]")
-            sys.exit()   
-
-    def recv_data(self):
-        try:
-            data = self.sock.recv(BUFFERSIZE).decode(ENCODING)
-            return data
-        except ConnectionError:
-            self.sock.close()
-            print("[Connection to server lost!]")
-            sys.exit()
-
-    def enter_chatroom(self):
-        # This method first sends the user info of the client to the server and then receives a banner or a welcome 
-        self.send_data(self.NAME)
-        banner = self.recv_data()
-        print(banner)
-    
-    def connect(self):
         try:
             print(f"[*] Connecting to {self.HOSTIP}:{self.PORT}")
             self.sock.connect((self.HOSTIP,self.PORT))
@@ -58,8 +57,7 @@ class Client:
             self.enter_chatroom()
             self.chat()
         except Exception as e:
-            print("[-] Failed to connect to server")
-            print(str(e))
+            print("[error]", str(e))
             sys.exit()
     
     def send_messages(self):
@@ -68,18 +66,20 @@ class Client:
                 data = input(f"<{self.NAME} *>: ").strip()
                 if len(data)==0:
                     continue
-                if data.lower() in ["$exit", "$quit"]:
+                if data.lower() in ["exit", "quit"]:
                     print("[You Exited!]")
-                    break
+                    self.sock.close()
+                    sys.exit()
                 data = f"<{self.NAME}>: {data}"
-                self.send_data(data)
+                self.send(data)
         except KeyboardInterrupt:
             print("[You Exited!]")
             self.sock.close()
+            sys.exit()
 
     def recv_messages(self):
         while True:
-            data = self.recv_data()
+            data = self.recv()
             if not data: continue
             print(data)
 
@@ -93,5 +93,5 @@ class Client:
         self.sock.close()
 
 if __name__ == "__main__":
-    name = input("[ ] Enter your name: ")
+    name = input("[ ] Enter your name: ").strip().replace(' ','_')
     Client(name).connect()
