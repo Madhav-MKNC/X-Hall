@@ -49,7 +49,7 @@ class Client:
         except socket.error as e:
             print("[!] Failed to create a socket")
             print("[error]",str(e))
-            sys.exit()
+            exit()
         try:
             print(f"[*] Connecting to {self.HOSTIP}:{self.PORT}")
             self.sock.connect((self.HOSTIP,self.PORT))
@@ -58,18 +58,20 @@ class Client:
             self.chat()
         except Exception as e:
             print("[error]", str(e))
+            self.sock.close()
             sys.exit()
     
     def send_messages(self):
         try:
             while True:
-                data = input(f"<{self.NAME} *>: ").strip()
+                print(f"<{self.NAME} *> ",end="")
+                data = input().strip()
                 if len(data)==0:
                     continue
                 if data.lower() in ["exit", "quit"]:
                     print("[You Exited!]")
                     self.sock.close()
-                    sys.exit()
+                    exit()
                 data = f"<{self.NAME}>: {data}"
                 self.send(data)
         except KeyboardInterrupt:
@@ -78,10 +80,14 @@ class Client:
             sys.exit()
 
     def recv_messages(self):
-        while True:
-            data = self.recv()
-            if not data: continue
-            print(data)
+        try:
+            while True:
+                data = self.recv()
+                if data: print(data)
+        except Exception as e:
+            print("[error]",str(e))
+            self.sock.close()
+            sys.exit()
 
     def chat(self):
         try:

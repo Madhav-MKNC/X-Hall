@@ -50,31 +50,31 @@ class Client:
             self.sock.close()
     
     def send_messages(self):
-        while True:
-            try:
-                message = input(f"<{self.HOSTNAME} *> ").strip()
+        try:
+            while True:
+                print(f"<{self.HOSTNAME} *> ",end="")
+                message = input().strip()
                 if len(message)==0: continue
                 if message=="shutdown":
-                    # self.shutdown()
                     print("[shutdown!]")
-                    sys.exit()
+                    self.sock.close()
+                    sys.qw
                 message = f"<{self.HOSTNAME} *> "+message
                 self.send(message)
-            except Exception as e:
-                print("[error]",str(e))
-                break
+        except Exception as e:
+            print("[error]",str(e))
+            self.sock.close()
+            sys.exit()
 
     def recv_messages(self):
-        while True:
-            try:
+        try:
+            while True:
                 data = self.recv()
                 if data: print(data)
-            except Exception as e:
-                print("[error]",str(e))
-                break
-    
-
-
+        except Exception as e:
+            print("[error]",str(e))
+            self.sock.close()
+            sys.exit()
 
 class Server:
     def __init__(self, ip, port, hostname):
@@ -95,15 +95,15 @@ class Server:
         except KeyboardInterrupt:
             self.sock.shutdown(2)
             print("[shutdown!]")
-            sys.exit()
+            self.exit()
         except ConnectionError:
             self.clients.remove(client)
             self.broadcast(f"[<{client.name}> left!]")
             client.sock.close()
         except Exception as e:
             print("[error]",str(e))
-            self.sock.close()
-            sys.exit()
+            self.sock.shutdown()
+            self.exit()
 
     def broadcast(self, message):
         for client in self.clients:
