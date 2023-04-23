@@ -15,10 +15,9 @@ from constants import *
 class Client:
     def __init__(self, name):
         self.NAME = name
-
-        # host info
         self.HOSTIP = Host().ip
         self.PORT = Host().port
+        self.sys_exit = False
     
     def send(self, data):
         try:
@@ -26,7 +25,7 @@ class Client:
         except ConnectionError:
             self.sock.close()
             print("[Connection lost!]")
-            sys.exit()   
+            self.sys_exit = True
 
     def recv(self):
         try:
@@ -35,7 +34,7 @@ class Client:
         except ConnectionError:
             self.sock.close()
             print("[Connection lost!]")
-            sys.exit()
+            self.sys_exit = True
 
     def enter_chatroom(self):
         # This method first sends the user info of the client to the server and then receives a banner or a welcome 
@@ -49,7 +48,8 @@ class Client:
         except socket.error as e:
             print("[!] Failed to create a socket")
             print("[error]",str(e))
-            exit()
+            sys.exit()
+        
         try:
             print(f"[*] Connecting to {self.HOSTIP}:{self.PORT}")
             self.sock.connect((self.HOSTIP,self.PORT))
@@ -59,7 +59,6 @@ class Client:
         except Exception as e:
             print("[error]", str(e))
             self.sock.close()
-            sys.exit()
     
     def send_messages(self):
         try:
@@ -71,13 +70,13 @@ class Client:
                 if data.lower() in ["exit", "quit"]:
                     print("[You Exited!]")
                     self.sock.close()
-                    exit()
+                    self.sys_exit = True
                 data = f"<{self.NAME}>: {data}"
                 self.send(data)
         except KeyboardInterrupt:
             print("[You Exited!]")
             self.sock.close()
-            sys.exit()
+            self.sys_exit = True
 
     def recv_messages(self):
         try:
@@ -87,10 +86,11 @@ class Client:
         except Exception as e:
             print("[error]",str(e))
             self.sock.close()
-            sys.exit()
+            self.sys_exit = True
 
     def chat(self):
         try:
+            if self.sys_exit: sys.exit()
             threading.Thread(target=self.send_messages, daemon=True).start()
             threading.Thread(target=self.recv_messages, daemon=True).start()
             threading.Event().wait() # wait forever

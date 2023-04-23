@@ -58,13 +58,13 @@ class Client:
                 if message=="shutdown":
                     print("[shutdown!]")
                     self.sock.close()
-                    sys.qw
+                    return
                 message = f"<{self.HOSTNAME} *> "+message
                 self.send(message)
         except Exception as e:
             print("[error]",str(e))
             self.sock.close()
-            sys.exit()
+            return 
 
     def recv_messages(self):
         try:
@@ -74,7 +74,7 @@ class Client:
         except Exception as e:
             print("[error]",str(e))
             self.sock.close()
-            sys.exit()
+            return
 
 class Server:
     def __init__(self, ip, port, hostname):
@@ -95,7 +95,7 @@ class Server:
         except KeyboardInterrupt:
             self.sock.shutdown(2)
             print("[shutdown!]")
-            self.exit()
+            return
         except ConnectionError:
             self.clients.remove(client)
             self.broadcast(f"[<{client.name}> left!]")
@@ -130,9 +130,6 @@ class Server:
         except socket.error as e:
             print("[!] Failed to start server")
             print("[error]", str(e))
-            sys.exit()
-
-
 
 
 if __name__ == '__main__':   
